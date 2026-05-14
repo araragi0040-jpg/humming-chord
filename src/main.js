@@ -2,8 +2,8 @@ import "./styles.css";
 
 /**
  * Basic Pitch連携テスト
- * v0.12では、既存の簡易解析へはまだ差し替えません。
- * まずはブラウザ上でBasic Pitchを読み込み、音声からnote候補を取得できるか確認します。
+ * v0.13では、Basic Pitch検出音を既存のキー推定・参考コード生成へ反映できます。
+ * まずは通常の簡易解析で読み込み、その後ボタン操作でBasic Pitch結果へ差し替えます。
  */
 const BASIC_PITCH_ENABLED = true;
 const BASIC_PITCH_MODEL_URL = "/basic-pitch-model/model.json";
@@ -219,6 +219,7 @@ const state = {
   ],
   detectedNotes: [],
   basicPitchNotes: [],
+  analysisSource: "simple",
   audioDuration: 0,
   decodedAudioBuffer: null,
   audioBlob: null,
@@ -290,6 +291,8 @@ const els = {
   outputText: document.getElementById("outputText"),
   solfegeOutputText: document.getElementById("solfegeOutputText"),
   runBasicPitchTest: document.getElementById("runBasicPitchTest"),
+  applyBasicPitchResult: document.getElementById("applyBasicPitchResult"),
+  restoreSimpleAnalysis: document.getElementById("restoreSimpleAnalysis"),
   basicPitchProgress: document.getElementById("basicPitchProgress"),
   basicPitchProgressLabel: document.getElementById("basicPitchProgressLabel"),
   basicPitchStatus: document.getElementById("basicPitchStatus"),
@@ -1039,6 +1042,7 @@ function updateOutputText() {
     `Reference Apply Mode: ${state.referenceApplyMode}`,
     `Chord Option Mode: ${state.chordOptionMode}`,
     `Key: ${state.key}`,
+    `Analysis Source: ${state.analysisSource}`,
     `Detected Notes: ${state.detectedNotes.length}`,
     "",
     "Bar Summary:",
@@ -1090,6 +1094,7 @@ async function handleAudioBlob(blob, label) {
 
     state.key = result.keyLabel;
     state.keyInfo = result.keyInfo;
+    state.analysisSource = "simple";
     setDetectedNotes(result.notes);
 
     const chordAnalysis = generateChordAnalysis(
@@ -1116,6 +1121,7 @@ function resetBasicPitchTestUi() {
   if (els.basicPitchProgress) els.basicPitchProgress.value = 0;
   if (els.basicPitchProgressLabel) els.basicPitchProgressLabel.textContent = "0%";
   if (els.basicPitchNoteCount) els.basicPitchNoteCount.textContent = "--";
+  if (els.applyBasicPitchResult) els.applyBasicPitchResult.disabled = true;
   if (els.basicPitchPreview) els.basicPitchPreview.textContent = "まだ結果はありません。";
 
   if (els.basicPitchStatus) {
@@ -1187,9 +1193,13 @@ async function runBasicPitchTest() {
       els.basicPitchNoteCount.textContent = String(state.basicPitchNotes.length);
     }
 
+    if (els.applyBasicPitchResult) {
+      els.applyBasicPitchResult.disabled = !state.basicPitchNotes.length;
+    }
+
     if (els.basicPitchStatus) {
       els.basicPitchStatus.textContent = state.basicPitchNotes.length
-        ? `Basic Pitch解析テスト完了：${state.basicPitchNotes.length}音を検出しました。次版でコード生成へ接続します。`
+        ? `Basic Pitch解析テスト完了：${state.basicPitchNotes.length}音を検出しました。「Basic Pitch結果をコード生成に反映」を押すと、参考コードへ接続できます。`
         : "Basic Pitch解析は完了しましたが、音符候補は検出されませんでした。別の音声で試してください。";
     }
 
@@ -1208,6 +1218,131 @@ async function runBasicPitchTest() {
     }
   } finally {
     els.runBasicPitchTest.disabled = false;
+  }
+}
+
+function getUsableBasicPitchNotes(notes) {
+  const raw = Array.isArray(notes) ? notes : [];
+  if (!raw.length) return [];
+
+  const filtered = raw.filter((note) =>
+    Number.isFinite(note.start) &&
+    Number.isFinite(note.end) &&
+    Number.isFinite(note.midi) &&
+    note.duration >= 0.04 &&
+    note.confidence >= 0.18
+  );
+
+  const usable = filtered.length >= 3 ? filtered : raw;
+  return usable
+    .map((note) => ({
+      ...note,
+      pc: ((note.midi % 12) + 12) % 12,
+      name: note.name || midiToNoteName(note.midi),
+      source: "basic-pitch"
+    }))
+    .sort((a, b) => a.start - b.start);
+}
+
+function applyAnalysisResultToChordUi({ notes, sourceLabel, statusLabel }) {
+  const usableNotes = Array.isArray(notes) ? notes : [];
+
+  if (!usableNotes.length) {
+    els.audioStatus.textContent = "反映できる音符候補がありません。先に解析してください。";
+    return;
+  }
+
+  const estimated = estimateBpmFromNotes(usableNotes);
+  const keyInfo = estimateKey(usableNotes);
+  const duration = Math.max(
+    state.decodedAudioBuffer?.duration || 0,
+    state.audioDuration || 0,
+    ...usableNotes.map((note) => note.end || 0)
+  );
+
+  state.analysisSource = sourceLabel;
+  state.audioDuration = duration;
+  state.keyInfo = keyInfo;
+  state.key = keyInfo ? `${NOTE_NAMES[keyInfo.tonic]} ${keyInfo.mode}` : "--";
+
+  setEstimatedBpm(estimated);
+  if (estimated) {
+    setPlaybackBpm(estimated);
+  }
+
+  setDetectedNotes(usableNotes);
+
+  const chordAnalysis = generateChordAnalysis(
+    state.detectedNotes,
+    state.keyInfo,
+    state.playbackBpm,
+    state.audioDuration
+  );
+
+  applyReferenceChords(chordAnalysis);
+  renderChordGrid();
+  updateOutputText();
+
+  els.audioStatus.textContent = statusLabel;
+}
+
+function applyBasicPitchResultToChordGeneration() {
+  const usableNotes = getUsableBasicPitchNotes(state.basicPitchNotes);
+
+  if (!usableNotes.length) {
+    if (els.basicPitchStatus) {
+      els.basicPitchStatus.textContent = "Basic Pitch検出音がありません。先にBasic Pitch解析テストを実行してください。";
+    }
+    return;
+  }
+
+  applyAnalysisResultToChordUi({
+    notes: usableNotes,
+    sourceLabel: "basic-pitch",
+    statusLabel: `Basic Pitch検出音 ${usableNotes.length}音を使って、キー・参考コード・4拍マスを再生成しました。`
+  });
+
+  if (els.basicPitchStatus) {
+    els.basicPitchStatus.textContent = `Basic Pitch結果をコード生成へ反映しました。検出音数：${usableNotes.length}`;
+  }
+}
+
+function restoreSimpleAnalysisFromDecodedAudio() {
+  if (!state.decodedAudioBuffer) {
+    els.audioStatus.textContent = "戻せる音声がありません。先に音声ファイル選択または録音を行ってください。";
+    return;
+  }
+
+  const result = analyzeHumming(state.decodedAudioBuffer);
+
+  applyAnalysisResultToChordUi({
+    notes: result.notes,
+    sourceLabel: "simple",
+    statusLabel: "簡易解析の結果に戻しました。"
+  });
+
+  state.key = result.keyLabel;
+  state.keyInfo = result.keyInfo;
+  setEstimatedBpm(result.estimatedBpm);
+  if (result.estimatedBpm) {
+    setPlaybackBpm(result.estimatedBpm);
+  }
+
+  const chordAnalysis = generateChordAnalysis(
+    state.detectedNotes,
+    state.keyInfo,
+    state.playbackBpm,
+    state.audioDuration
+  );
+
+  applyReferenceChords(chordAnalysis);
+  renderChordGrid();
+  updateOutputText();
+
+  if (els.basicPitchStatus) {
+    els.basicPitchStatus.textContent = state.basicPitchNotes.length
+      ? "簡易解析に戻しました。Basic Pitch結果は保持しているので、再度反映できます。"
+      : "簡易解析に戻しました。";
   }
 }
 
@@ -2300,6 +2435,14 @@ if (els.chordOptionModeInput) {
 
 if (els.runBasicPitchTest) {
   els.runBasicPitchTest.addEventListener("click", runBasicPitchTest);
+}
+
+if (els.applyBasicPitchResult) {
+  els.applyBasicPitchResult.addEventListener("click", applyBasicPitchResultToChordGeneration);
+}
+
+if (els.restoreSimpleAnalysis) {
+  els.restoreSimpleAnalysis.addEventListener("click", restoreSimpleAnalysisFromDecodedAudio);
 }
 
 els.tapTempo.addEventListener("click", () => {

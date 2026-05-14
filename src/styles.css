@@ -1372,3 +1372,36 @@ body {
     grid-template-columns: 1fr 40px;
   }
 }
+
+
+/* v0.13: Basic Pitch結果反映ボタン */
+.basic-pitch-panel {
+  grid-template-columns: minmax(180px, 260px) minmax(200px, 1fr) minmax(120px, 180px);
+}
+
+.basic-pitch-panel .basic-pitch-progress-wrap {
+  grid-column: 1 / -1;
+}
+
+.basic-pitch-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+button.ghost {
+  background: #ffffff;
+  color: var(--primary);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .basic-pitch-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .basic-pitch-panel .basic-pitch-progress-wrap {
+    grid-column: auto;
+  }
+}

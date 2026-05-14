@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ハミングコード MVP v0.12.1 Basic Pitch Test</title>
+  <title>ハミングコード MVP v0.13 Basic Pitch Apply</title>
 </head>
 <body>
   <main class="app">
@@ -11,7 +11,7 @@
       <p class="eyebrow">Humming → Key / Chord Draft</p>
       <h1>ハミングコード</h1>
       <p class="lead">
-        鼻歌から推定BPM・メロディ・キー・参考コードを作り、Basic Pitchの読み込みテストもできるMVPです。
+        鼻歌から推定BPM・メロディ・キー・参考コードを作り、Basic Pitch結果をコード生成へ反映できるMVPです。
       </p>
     </header>
 
@@ -155,6 +155,12 @@
         <button id="runBasicPitchTest" type="button" class="secondary">
           Basic Pitchで解析テスト
         </button>
+        <button id="applyBasicPitchResult" type="button" disabled>
+          Basic Pitch結果をコード生成に反映
+        </button>
+        <button id="restoreSimpleAnalysis" type="button" class="ghost">
+          簡易解析に戻す
+        </button>
         <div class="basic-pitch-progress-wrap">
           <progress id="basicPitchProgress" value="0" max="100"></progress>
           <span id="basicPitchProgressLabel">0%</span>
@@ -168,7 +174,7 @@
       <div class="basic-pitch-result">
         <span>Basic Pitch検出音数</span>
         <strong id="basicPitchNoteCount">--</strong>
-        <small>この段階では確認用です。次版でコード生成へ接続します。</small>
+        <small>反映ボタンを押すと、この検出結果からキー・参考コードを再生成します。</small>
       </div>
 
       <details class="details">
@@ -203,7 +209,7 @@
 
     <footer>
       <p>
-        v0.12.1 / Basic Pitch用に22050Hzへ自動変換する処理を追加。推定結果は必ず耳で確認してください。
+        v0.13 / Basic Pitch検出音をキー推定・参考コード生成へ反映可能に変更。推定結果は必ず耳で確認してください。
       </p>
     </footer>
   </main>
