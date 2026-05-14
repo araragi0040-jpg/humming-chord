@@ -1,6 +1,13 @@
-# ハミングコード MVP v0.12 Basic Pitch読み込みテスト版
+# ハミングコード MVP v0.12.1 Basic Pitchリサンプリング対応版
 
 v0.11 Vite版をベースに、Basic Pitchの読み込みテスト欄を追加した版です。
+
+## v0.12.1で修正したこと
+
+- Basic Pitch実行時に `Input audio buffer is not at correct sample rate! Is 48000. Should be 22050` が出る問題を修正
+- Basic Pitchに渡す前に音声を自動で22050Hzへリサンプリング
+- 複数チャンネル音声をモノラル化してからBasic Pitchへ渡す処理を追加
+- 既存の簡易解析・UI・Vercel構成は維持
 
 ## v0.12で変更したこと
 
@@ -70,7 +77,7 @@ Install Command: npm install
 
 ## 注意
 
-v0.12では、Basic Pitchの検出結果はまだコード生成へ反映していません。
+v0.12.1では、Basic Pitchの検出結果はまだコード生成へ反映していません。
 
 次のv0.13で、
 

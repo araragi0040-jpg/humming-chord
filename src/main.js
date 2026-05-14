@@ -7,6 +7,7 @@ import "./styles.css";
  */
 const BASIC_PITCH_ENABLED = true;
 const BASIC_PITCH_MODEL_URL = "/basic-pitch-model/model.json";
+const BASIC_PITCH_SAMPLE_RATE = 22050;
 const BASIC_PITCH_ONSET_THRESHOLD = 0.25;
 const BASIC_PITCH_FRAME_THRESHOLD = 0.25;
 const BASIC_PITCH_MIN_NOTE_LENGTH = 5;
@@ -38,12 +39,13 @@ async function analyzeWithBasicPitchIfAvailable(audioBuffer, onProgress = () => 
   } = await loadBasicPitchModule();
 
   const basicPitch = await getBasicPitchInstance();
+  const preparedAudioBuffer = await prepareBasicPitchAudioBuffer(audioBuffer);
   const frames = [];
   const onsets = [];
   const contours = [];
 
   await basicPitch.evaluateModel(
-    audioBuffer,
+    preparedAudioBuffer,
     (frameBatch, onsetBatch, contourBatch) => {
       frames.push(...frameBatch);
       onsets.push(...onsetBatch);
@@ -83,6 +85,42 @@ async function analyzeWithBasicPitchIfAvailable(audioBuffer, onProgress = () => 
     notes,
     rawNotes
   };
+}
+
+async function prepareBasicPitchAudioBuffer(audioBuffer) {
+  if (
+    audioBuffer.sampleRate === BASIC_PITCH_SAMPLE_RATE &&
+    audioBuffer.numberOfChannels === 1
+  ) {
+    return audioBuffer;
+  }
+
+  return resampleToMonoAudioBuffer(audioBuffer, BASIC_PITCH_SAMPLE_RATE);
+}
+
+async function resampleToMonoAudioBuffer(audioBuffer, targetSampleRate) {
+  const mono = mixToMono(audioBuffer);
+  const sourceLength = mono.length;
+  const duration = audioBuffer.duration;
+  const targetLength = Math.max(1, Math.ceil(duration * targetSampleRate));
+
+  const OfflineAudioContextClass =
+    window.OfflineAudioContext || window.webkitOfflineAudioContext;
+
+  if (!OfflineAudioContextClass) {
+    throw new Error("このブラウザはOfflineAudioContextに対応していないため、Basic Pitch用のリサンプリングができません。");
+  }
+
+  const offlineCtx = new OfflineAudioContextClass(1, targetLength, targetSampleRate);
+  const monoBuffer = offlineCtx.createBuffer(1, sourceLength, audioBuffer.sampleRate);
+  monoBuffer.copyToChannel(mono, 0);
+
+  const source = offlineCtx.createBufferSource();
+  source.buffer = monoBuffer;
+  source.connect(offlineCtx.destination);
+  source.start(0);
+
+  return await offlineCtx.startRendering();
 }
 
 function normalizeBasicPitchNote(note) {
@@ -1123,6 +1161,14 @@ async function runBasicPitchTest() {
   }
 
   try {
+    if (els.basicPitchStatus) {
+      els.basicPitchStatus.textContent = state.decodedAudioBuffer.sampleRate === BASIC_PITCH_SAMPLE_RATE
+        ? "Basic Pitch解析を開始します。"
+        : `Basic Pitch用に ${state.decodedAudioBuffer.sampleRate}Hz → ${BASIC_PITCH_SAMPLE_RATE}Hz へ変換してから解析します。`;
+    }
+
+    await waitFrame();
+
     const result = await analyzeWithBasicPitchIfAvailable(
       state.decodedAudioBuffer,
       (progress) => {
