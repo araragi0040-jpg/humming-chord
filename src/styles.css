@@ -1,0 +1,1296 @@
+:root {
+  --bg: #f4f8fb;
+  --card: #ffffff;
+  --text: #162033;
+  --muted: #64748b;
+  --line: #dbe7f2;
+  --primary: #1456a0;
+  --primary-2: #2f9ad9;
+  --soft: #eaf5ff;
+  --soft-2: #f3f9ff;
+  --shadow: 0 14px 30px rgba(20, 86, 160, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(47, 154, 217, 0.18), transparent 36%),
+    linear-gradient(180deg, #f7fbff 0%, var(--bg) 100%);
+  color: var(--text);
+}
+
+.app {
+  width: min(960px, 100%);
+  margin: 0 auto;
+  padding: 20px 14px 42px;
+}
+
+.hero {
+  padding: 28px 6px 18px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--primary-2);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(30px, 8vw, 54px);
+  letter-spacing: -0.04em;
+}
+
+.lead {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  margin: 14px 0;
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.actions.compact {
+  margin-top: 12px;
+}
+
+button,
+.file-button {
+  appearance: none;
+  border: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: white;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+button:hover,
+.file-button:hover {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  background: var(--soft);
+  color: var(--primary);
+}
+
+button.secondary {
+  background: #20364f;
+}
+
+.file-button input {
+  display: none;
+}
+
+.status,
+.note,
+footer {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+audio {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.result-box {
+  background: #f8fbff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.result-box.active {
+  background: var(--soft);
+  border-color: rgba(47, 154, 217, 0.45);
+}
+
+.result-box span,
+.result-box small {
+  display: block;
+  color: var(--muted);
+}
+
+.result-box span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.result-box strong {
+  display: block;
+  margin: 5px 0;
+  font-size: 26px;
+  overflow-wrap: anywhere;
+}
+
+.result-box small {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.bpm-control {
+  display: grid;
+  grid-template-columns: 54px 1fr 54px;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.bpm-control input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 0 14px;
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+  color: var(--text);
+  background: white;
+}
+
+.tap-area {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.octave-control,
+.bar-offset-control,
+.reference-mode-control {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft-2);
+}
+
+.bar-offset-control {
+  grid-template-columns: 1fr 360px;
+}
+
+.reference-mode-control {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft-2);
+}
+
+.octave-control span,
+.bar-offset-control span,
+.reference-mode-control span {
+  display: block;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.octave-control small,
+.bar-offset-control small,
+.reference-mode-control small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.octave-control select,
+.reference-mode-control select,
+.bar-offset-control input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0 10px;
+  color: var(--text);
+  background: white;
+  font-weight: 800;
+}
+
+.bar-offset-control input {
+  text-align: center;
+}
+
+.offset-tools {
+  display: grid;
+  grid-template-columns: 1fr 86px 1fr 1fr;
+  gap: 8px;
+}
+
+.offset-tools button {
+  min-height: 42px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.details {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft-2);
+  overflow: hidden;
+}
+
+.details summary {
+  cursor: pointer;
+  padding: 12px 14px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.melody-preview {
+  border-top: 1px solid var(--line);
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.chord-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.chord-cell {
+  border: 1px solid var(--line);
+  background: #f8fbff;
+  border-radius: 18px;
+  padding: 10px;
+}
+
+.chord-cell label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.chord-cell select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  background: white;
+}
+
+.candidate-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.candidate-pill {
+  min-height: 30px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--primary);
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.candidate-pill:hover {
+  transform: translateY(-1px);
+}
+
+.candidate-pill.current {
+  background: var(--primary);
+  color: white;
+}
+
+.candidate-score {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.bar-select-wrap {
+  margin-top: 4px;
+}
+
+.bar-select-wrap span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.beat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.beat-cell {
+  min-width: 0;
+}
+
+.beat-cell span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.beat-cell select {
+  min-height: 38px;
+  padding: 0 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.chord-cell.playing {
+  border-color: rgba(20, 86, 160, 0.5);
+  box-shadow: 0 10px 22px rgba(20, 86, 160, 0.12);
+}
+
+.beat-cell.playing span {
+  color: var(--primary);
+}
+
+.beat-cell.playing select {
+  border-color: var(--primary);
+  background: #dff0ff;
+  box-shadow: 0 0 0 3px rgba(47, 154, 217, 0.16);
+}
+
+.quick-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.quick-actions button {
+  min-height: 30px;
+  padding: 0 9px;
+  font-size: 11px;
+  background: #edf6ff;
+  color: var(--primary);
+  box-shadow: none;
+}
+
+textarea {
+  width: 100%;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  line-height: 1.55;
+  color: var(--text);
+  background: #fbfdff;
+}
+
+footer {
+  text-align: center;
+  padding: 8px 0 0;
+}
+
+@media (max-width: 720px) {
+  .result-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chord-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .beat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 420px) {
+  .actions,
+  .tap-area {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  button,
+  .file-button {
+    width: 100%;
+  }
+
+  .result-box strong {
+    font-size: 22px;
+  }
+
+  .beat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .octave-control,
+  .bar-offset-control,
+  .reference-mode-control {
+    grid-template-columns: 1fr;
+  }
+
+  .offset-tools {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+/* v0.6: 候補ボタンUIは削除。古いキャッシュ対策として非表示指定も残す */
+.candidate-list,
+.quick-actions,
+.candidate-score {
+  display: none !important;
+}
+
+
+.reference-chords {
+  margin: 12px 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft-2);
+}
+
+.reference-chords span {
+  display: block;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.reference-chords strong {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+
+/* v0.9: 抽出参考コードを拍単位で見やすく表示 */
+.reference-chords strong {
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+
+/* v0.9.4: 拍ごとのオクターブ指定 */
+.bar-octave-wrap {
+  margin-top: 8px;
+}
+
+.bar-octave-wrap span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.bar-octave-wrap select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0 10px;
+  color: var(--text);
+  background: white;
+  font-weight: 800;
+}
+
+.beat-octave-select {
+  margin-top: 5px;
+  min-height: 32px !important;
+  font-size: 12px !important;
+  color: var(--muted) !important;
+}
+
+
+/* v0.9.6: ドレミ表記出力 */
+.solfege-output {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.solfege-output h3 {
+  margin: 0 0 6px;
+  color: var(--primary);
+  font-size: 16px;
+}
+
+.solfege-output p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+#solfegeOutputText {
+  background: #f8fbff;
+}
+
+
+/* v0.9.7: 現在のコード・高さを常時見えるようにする */
+.bar-current-summary {
+  margin: 8px 0 10px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: #eef7ff;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.beat-current {
+  display: block;
+  margin: 0 0 6px;
+  padding: 6px 4px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+  text-align: center;
+  min-height: 42px;
+}
+
+.beat-current .code {
+  display: block;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+.beat-current .octave {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.beat-cell select {
+  width: 100%;
+}
+
+.beat-octave-select {
+  color: var(--text) !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 420px) {
+  .beat-current {
+    font-size: 12px;
+    min-height: 40px;
+  }
+
+  .beat-current .code {
+    font-size: 14px;
+  }
+}
+
+
+/* v0.9.8: 表示・編集設定 */
+.settings-card {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 12px;
+}
+
+.settings-panel {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft-2);
+}
+
+.settings-panel h3 {
+  margin: 0 0 10px;
+  color: var(--primary);
+  font-size: 15px;
+}
+
+.switch-row,
+.select-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 7px 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  border-bottom: 1px solid rgba(219, 231, 242, 0.8);
+}
+
+.switch-row:last-child,
+.select-row:last-child {
+  border-bottom: 0;
+}
+
+.switch-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  flex: 0 0 auto;
+}
+
+.switch-row span {
+  flex: 1;
+}
+
+.select-row {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.select-row select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0 10px;
+  color: var(--text);
+  background: white;
+  font-weight: 800;
+}
+
+.settings-help {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.app-block h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.block-toggle {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--primary);
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.block-body {
+  display: block;
+}
+
+.app-block.block-collapsed .block-body {
+  display: none;
+}
+
+.app-block.block-collapsed {
+  opacity: 0.92;
+}
+
+@media (max-width: 720px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-block h2 {
+    align-items: flex-start;
+  }
+}
+
+
+/* v0.9.9: 表示ブロックON/OFF削除後の設定欄・半音調整ボタン */
+.settings-grid.single {
+  grid-template-columns: 1fr;
+}
+
+.semitone-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.semitone-tools button {
+  min-height: 30px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #edf6ff;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: none;
+}
+
+.semitone-tools button:hover {
+  transform: translateY(-1px);
+}
+
+.bar-semitone-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.bar-semitone-tools button {
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #edf6ff;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: none;
+}
+
+
+/* v0.10: 1拍 / コード / 高さをひとまとまりで表示 */
+.beat-current {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 7px;
+  padding: 6px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--text);
+  text-align: center;
+  min-height: 68px;
+}
+
+.beat-shift-button {
+  width: 28px;
+  min-width: 28px;
+  min-height: 42px;
+  padding: 0;
+  border-radius: 12px;
+  background: #edf6ff;
+  color: var(--primary);
+  font-size: 17px;
+  font-weight: 1000;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.beat-shift-button:hover {
+  transform: translateY(-1px);
+}
+
+.beat-current-center {
+  min-width: 0;
+}
+
+.beat-current .code {
+  display: block;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 1000;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.beat-current .octave {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.semitone-tools {
+  display: none !important;
+}
+
+@media (max-width: 420px) {
+  .beat-current {
+    grid-template-columns: 24px 1fr 24px;
+    gap: 4px;
+    padding: 5px;
+    min-height: 62px;
+  }
+
+  .beat-shift-button {
+    width: 24px;
+    min-width: 24px;
+    min-height: 38px;
+    font-size: 15px;
+  }
+
+  .beat-current .code {
+    font-size: 16px;
+  }
+
+  .beat-current .octave {
+    font-size: 11px;
+  }
+}
+
+
+/* v0.10.1: 横幅不足対策。±ボタンを上下配置へ変更 */
+.beat-current {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 22px auto 22px;
+  align-items: center;
+  justify-items: center;
+  gap: 4px;
+  margin: 0 0 7px;
+  padding: 6px 5px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--text);
+  text-align: center;
+  min-height: 96px;
+  overflow: visible;
+}
+
+.beat-current-center {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+}
+
+.beat-shift-button {
+  width: 38px;
+  min-width: 38px;
+  min-height: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 999px;
+  background: #edf6ff;
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 1000;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.beat-current .code {
+  display: block;
+  width: 100%;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 1000;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.beat-current .octave {
+  display: block;
+  width: 100%;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .beat-current {
+    grid-template-columns: 1fr;
+    grid-template-rows: 20px auto 20px;
+    gap: 3px;
+    padding: 5px 4px;
+    min-height: 88px;
+  }
+
+  .beat-shift-button {
+    width: 34px;
+    min-width: 34px;
+    min-height: 20px;
+    height: 20px;
+    font-size: 14px;
+  }
+
+  .beat-current .code {
+    font-size: 15px;
+  }
+
+  .beat-current .octave {
+    font-size: 10px;
+  }
+}
+
+
+/* v0.10.2: スマホ向けUI調整 */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.app-block,
+.settings-card {
+  scroll-margin-top: 72px;
+}
+
+.quick-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 2px 10px;
+  margin: -4px 0 8px;
+  background: rgba(244, 248, 251, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-nav a {
+  flex: 1 0 auto;
+  min-width: 72px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 6px 14px rgba(20, 86, 160, 0.08);
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 10px 10px 30px;
+  }
+
+  .hero {
+    padding: 18px 4px 10px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  .lead {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .card {
+    margin: 10px 0;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .card h2 {
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .result-box {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .result-box strong {
+    font-size: 22px;
+  }
+
+  .bpm-control {
+    grid-template-columns: 48px 1fr 48px;
+  }
+
+  .octave-control,
+  .reference-mode-control {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .tap-area {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .chord-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .chord-cell {
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .bar-current-summary {
+    display: none;
+  }
+
+  .bar-semitone-tools {
+    grid-template-columns: 1fr 1fr;
+    margin: 7px 0 9px;
+  }
+
+  .bar-semitone-tools button {
+    min-height: 34px;
+    font-size: 12px;
+  }
+
+  .bar-select-wrap,
+  .bar-octave-wrap {
+    margin-top: 7px;
+  }
+
+  .bar-select-wrap select,
+  .bar-octave-wrap select {
+    min-height: 40px;
+    font-size: 15px;
+  }
+
+  .beat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .beat-cell span {
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+
+  .beat-current {
+    grid-template-columns: 1fr;
+    grid-template-rows: 20px auto 20px;
+    gap: 3px;
+    min-height: 84px;
+    padding: 5px 4px;
+    border-radius: 14px;
+  }
+
+  .beat-shift-button {
+    width: 34px;
+    min-width: 34px;
+    height: 20px;
+    min-height: 20px;
+    font-size: 14px;
+  }
+
+  .beat-current .code {
+    font-size: 15px;
+  }
+
+  .beat-current .octave {
+    font-size: 10px;
+  }
+
+  .beat-cell select {
+    min-height: 34px;
+    padding: 0 4px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
+
+  .beat-octave-select {
+    min-height: 30px !important;
+    font-size: 11px !important;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .actions button,
+  .file-button {
+    min-height: 42px;
+  }
+
+  textarea {
+    font-size: 12px;
+    min-height: 150px;
+    border-radius: 16px;
+  }
+
+  .reference-chords strong,
+  .melody-preview {
+    font-size: 12px;
+    line-height: 1.65;
+  }
+}
+
+@media (max-width: 420px) {
+  .app {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  .quick-nav {
+    gap: 6px;
+  }
+
+  .quick-nav a {
+    min-width: 64px;
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .result-box strong {
+    font-size: 20px;
+  }
+
+  .beat-grid {
+    gap: 5px;
+  }
+
+  .beat-current {
+    min-height: 78px;
+    padding: 4px 3px;
+  }
+
+  .beat-shift-button {
+    width: 30px;
+    min-width: 30px;
+    height: 19px;
+    min-height: 19px;
+    font-size: 13px;
+  }
+
+  .beat-current .code {
+    font-size: 14px;
+  }
+
+  .beat-current .octave {
+    font-size: 10px;
+  }
+
+  .beat-cell select {
+    font-size: 11px;
+  }
+}
