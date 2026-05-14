@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ハミングコード MVP v0.10.2</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">Humming → Key / Chord Draft</p>
+      <h1>ハミングコード</h1>
+      <p class="lead">
+        鼻歌から推定BPM・メロディ・キー・参考コードを作り、スマホでも編集しやすいブラウザ完結MVPです。
+      </p>
+    </header>
+
+    <nav class="quick-nav" aria-label="スマホ用クイック移動">
+      <a href="#uploadBlock">録音</a>
+      <a href="#analysisBlock">解析</a>
+      <a href="#chordBlock">コード</a>
+      <a href="#outputBlock">出力</a>
+    </nav>
+
+
+    <section class="card settings-card" id="displaySettingsBlock">
+      <h2>表示・編集設定</h2>
+      <p class="note">
+        コード選択肢の範囲を切り替えられます。各ブロックは、それぞれの見出し右側のボタンで折りたたみ・展開できます。
+      </p>
+
+      <div class="settings-grid single">
+        <div class="settings-panel">
+          <h3>コード選択肢</h3>
+          <label class="select-row">
+            <span>選択肢の範囲</span>
+            <select id="chordOptionModeInput">
+              <option value="basic">基本：白鍵中心</option>
+              <option value="standard" selected>標準：12音のメジャー/マイナー</option>
+              <option value="extended">拡張：dim / 7th も含む</option>
+            </select>
+          </label>
+          <p class="settings-help">
+            現在入っているコードや抽出候補は、モードに関係なく選択肢へ残ります。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card app-block" id="uploadBlock">
+      <h2>1. 鼻歌を入れる</h2>
+      <div class="actions">
+        <label class="file-button">
+          音声ファイルを選択
+          <input id="audioFile" type="file" accept="audio/*" />
+        </label>
+        <button id="recordButton" type="button">録音開始</button>
+      </div>
+      <p id="audioStatus" class="status">まだ音声は読み込まれていません。</p>
+      <audio id="audioPreview" controls hidden></audio>
+    </section>
+
+    <section class="card app-block" id="analysisBlock">
+      <h2>2. 解析結果</h2>
+      <div class="result-grid">
+        <div class="result-box">
+          <span>推定BPM</span>
+          <strong id="estimatedBpm">--</strong>
+          <small>鼻歌の音の入りからの参考値</small>
+        </div>
+        <div class="result-box active">
+          <span>再生BPM</span>
+          <strong id="playbackBpm">90</strong>
+          <small>再生・MIDI出力・コード再生成に使用</small>
+        </div>
+        <div class="result-box">
+          <span>推定キー</span>
+          <strong id="keyLabel">--</strong>
+          <small>検出音の分布から推定</small>
+        </div>
+        <div class="result-box">
+          <span>検出音数</span>
+          <strong id="noteCount">0</strong>
+          <small>短すぎる音は除外</small>
+        </div>
+      </div>
+
+      <div class="bpm-control">
+        <button id="bpmDown" type="button">−</button>
+        <input id="bpmInput" type="number" min="40" max="240" value="90" />
+        <button id="bpmUp" type="button">＋</button>
+      </div>
+
+      <div class="tap-area">
+        <button id="tapTempo" type="button">タップでBPM設定</button>
+        <button id="regenerateChords" type="button" class="secondary">再生BPMでコード再生成</button>
+        <button id="resetTap" type="button" class="ghost">タップリセット</button>
+      </div>
+
+      <div class="octave-control">
+        <div>
+          <span>基準コードオクターブ</span>
+          <small>自動判定できない拍や追加小節の初期値に使います。解析後は各拍のメロディに合わせて高さも自動設定されます。</small>
+        </div>
+        <select id="chordOctaveInput">
+          <option value="2">低め：2</option>
+          <option value="3" selected>標準：3</option>
+          <option value="4">高め：4</option>
+          <option value="5">かなり高め：5</option>
+        </select>
+      </div>
+
+      <div class="reference-mode-control">
+        <div>
+          <span>参考コードの初期反映</span>
+          <small>「1拍ごと」を選ぶと、同じ小節内でも抽出コードが拍ごとに分かれて入ります。</small>
+        </div>
+        <select id="referenceApplyModeInput">
+          <option value="beat" selected>1拍ごとに4拍マスへ入れる</option>
+          <option value="bar">小節ごとにまとめて入れる</option>
+        </select>
+      </div>
+
+      <details class="details" id="melodyDetailsBlock">
+        <summary>検出メロディを見る</summary>
+        <div id="melodyPreview" class="melody-preview">まだ検出されていません。</div>
+      </details>
+    </section>
+
+    <section class="card app-block" id="chordBlock">
+      <h2>3. コード進行</h2>
+      <p class="note">
+        コードは「正解」ではなく、鼻歌メロディに合いそうな候補です。鼻歌を解析すると、各拍で検出されたメロディ音を含むコードを優先して4拍マスへ初期反映します。
+      </p>
+      <div class="reference-chords" id="referenceChordsBlock">
+        <span>抽出した参考コード（4拍マス）</span>
+        <strong id="referenceChordPreview">鼻歌を解析すると、ここに参考コードが表示されます。</strong>
+      </div>
+      <div id="chordGrid" class="chord-grid"></div>
+      <div class="actions compact">
+        <button id="addBar" type="button">小節追加</button>
+        <button id="removeBar" type="button" class="ghost">小節削除</button>
+      </div>
+    </section>
+
+    <section class="card app-block" id="outputBlock">
+      <h2>4. 確認・出力</h2>
+      <div class="actions">
+        <button id="playChords" type="button">コードを再生</button>
+        <button id="stopChords" type="button" class="ghost">停止</button>
+      </div>
+      <div class="actions">
+        <button id="copyText" type="button">コードをコピー</button>
+        <button id="downloadMidi" type="button">コードMIDIを書き出し</button>
+        <button id="downloadMelodyMidi" type="button">メロディMIDIを書き出し</button>
+        <button id="downloadFullMidi" type="button" class="secondary">コード＋メロディMIDI</button>
+        <button id="downloadJson" type="button" class="ghost">JSONを書き出し</button>
+      </div>
+      <textarea id="outputText" rows="9" readonly></textarea>
+
+      <div class="solfege-output" id="solfegeOutputBlock">
+        <h3>ドレミ表記</h3>
+        <p>
+          選択中の4拍マスを、ドレミ表記で確認できます。コード名だけでなく、実際に鳴る構成音も表示します。
+        </p>
+        <textarea id="solfegeOutputText" rows="10" readonly></textarea>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        v0.10.2 / スマホ向けに余白・カード幅・拍編集UI・クイック移動を調整。推定結果は必ず耳で確認してください。
+      </p>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
