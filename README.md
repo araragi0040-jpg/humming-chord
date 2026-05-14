@@ -1,16 +1,15 @@
-# ハミングコード MVP v0.11 Vite版
+# ハミングコード MVP v0.12 Basic Pitch読み込みテスト版
 
-v0.10.2の静的HTML/CSS/JS版を、Vite構成へ移行した版です。
+v0.11 Vite版をベースに、Basic Pitchの読み込みテスト欄を追加した版です。
 
-## v0.11で変更したこと
+## v0.12で変更したこと
 
-- Vite構成へ移行
-- `src/main.js` / `src/styles.css` に分離
-- `package.json` を追加
-- `npm run dev` / `npm run build` / `npm run preview` に対応
-- Vercel向けに `vercel.json` を追加
-- Basic Pitch連携準備枠を `src/main.js` に追加
-- 既存の簡易解析・コード進行編集・MIDI出力・スマホUIは維持
+- `@spotify/basic-pitch` を依存パッケージに追加
+- Basic Pitchモデルファイルを `public/basic-pitch-model/` にコピーするスクリプトを追加
+- `Basic Pitch連携テスト` ブロックを追加
+- 既存の簡易解析にはまだ反映せず、Basic Pitchで音符候補が取れるかだけ確認
+- Basic Pitchの進捗バー・検出音数・検出メモ表示を追加
+- Vercelビルド時にモデルコピー → Viteビルドの順で動くように調整
 
 ## ファイル構成
 
@@ -18,6 +17,8 @@ v0.10.2の静的HTML/CSS/JS版を、Vite構成へ移行した版です。
 package.json
 vercel.json
 index.html
+scripts/
+  copy-basic-pitch-model.mjs
 src/
   main.js
   styles.css
@@ -31,18 +32,22 @@ npm install
 npm run dev
 ```
 
-表示されたローカルURLを開いて確認してください。
+`npm install` 後に、以下が自動生成されます。
 
-## ビルド確認
+```text
+public/basic-pitch-model/model.json
+public/basic-pitch-model/group1-shard1of1.bin
+```
+
+もし生成されない場合は、手動で以下を実行してください。
 
 ```bash
-npm run build
-npm run preview
+npm run copy-basic-pitch-model
 ```
 
 ## Vercel設定
 
-Vercelでは基本的に自動判定でOKですが、必要なら以下にしてください。
+基本は自動判定でOKです。
 
 ```text
 Framework Preset: Vite
@@ -51,19 +56,30 @@ Output Directory: dist
 Install Command: npm install
 ```
 
-## Basic Pitch連携の次ステップ
-
-v0.12以降で以下を進めます。
+## v0.12での確認手順
 
 ```text
-1. Basic Pitch関連パッケージの導入
-2. 音声ファイルからメロディMIDI / notes を取得
-3. 現在の簡易ピッチ検出結果と差し替え
-4. 参考コード生成へ接続
-5. スマホでの処理負荷を確認
+1. 音声ファイルを選択、または録音
+2. 既存の簡易解析が完了する
+3. Basic Pitch連携テスト欄へ移動
+4. 「Basic Pitchで解析テスト」を押す
+5. 進捗バーが進むか確認
+6. Basic Pitch検出音数が出るか確認
+7. 検出メモに start / dur / conf が出るか確認
 ```
 
 ## 注意
 
-v0.11では、まだBasic Pitch本体は動いていません。
-今まで通りブラウザ内の簡易ピッチ検出を使っています。
+v0.12では、Basic Pitchの検出結果はまだコード生成へ反映していません。
+
+次のv0.13で、
+
+```text
+Basic Pitch検出音
+↓
+既存の detectedNotes 形式へ変換
+↓
+推定キー・参考コード生成へ接続
+```
+
+の流れに進みます。

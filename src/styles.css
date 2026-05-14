@@ -1294,3 +1294,81 @@ body {
     font-size: 11px;
   }
 }
+
+
+/* v0.12: Basic Pitch読み込みテスト */
+.basic-pitch-panel {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.basic-pitch-progress-wrap {
+  display: grid;
+  grid-template-columns: 1fr 44px;
+  align-items: center;
+  gap: 8px;
+}
+
+.basic-pitch-progress-wrap progress {
+  width: 100%;
+  height: 14px;
+  accent-color: var(--primary);
+}
+
+.basic-pitch-progress-wrap span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.basic-pitch-result {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft-2);
+}
+
+.basic-pitch-result span,
+.basic-pitch-result small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.basic-pitch-result strong {
+  display: block;
+  margin: 4px 0;
+  color: var(--primary);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.basic-pitch-preview {
+  margin: 8px 0 0;
+  padding: 12px;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #ffffff;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 720px) {
+  .basic-pitch-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .basic-pitch-progress-wrap {
+    grid-template-columns: 1fr 40px;
+  }
+}

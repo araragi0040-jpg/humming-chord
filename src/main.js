@@ -1,27 +1,139 @@
 import "./styles.css";
 
 /**
- * Basic Pitch連携準備枠
- * v0.11ではまだBasic Pitch本体は接続していません。
- *
- * 次のv0.12以降で、ここに @spotify/basic-pitch 等の読み込み処理を追加し、
- * 音声ファイルから notes: [{ midi, pc, name, start, end, duration, confidence }]
- * の形式へ変換します。
+ * Basic Pitch連携テスト
+ * v0.12では、既存の簡易解析へはまだ差し替えません。
+ * まずはブラウザ上でBasic Pitchを読み込み、音声からnote候補を取得できるか確認します。
  */
-const BASIC_PITCH_ENABLED = false;
+const BASIC_PITCH_ENABLED = true;
+const BASIC_PITCH_MODEL_URL = "/basic-pitch-model/model.json";
+const BASIC_PITCH_ONSET_THRESHOLD = 0.25;
+const BASIC_PITCH_FRAME_THRESHOLD = 0.25;
+const BASIC_PITCH_MIN_NOTE_LENGTH = 5;
 
-async function analyzeWithBasicPitchIfAvailable(audioBuffer) {
+let basicPitchModuleCache = null;
+let basicPitchInstanceCache = null;
+
+async function loadBasicPitchModule() {
+  if (basicPitchModuleCache) return basicPitchModuleCache;
+  basicPitchModuleCache = await import("@spotify/basic-pitch");
+  return basicPitchModuleCache;
+}
+
+async function getBasicPitchInstance() {
+  if (basicPitchInstanceCache) return basicPitchInstanceCache;
+
+  const { BasicPitch } = await loadBasicPitchModule();
+  basicPitchInstanceCache = new BasicPitch(BASIC_PITCH_MODEL_URL);
+  return basicPitchInstanceCache;
+}
+
+async function analyzeWithBasicPitchIfAvailable(audioBuffer, onProgress = () => {}) {
   if (!BASIC_PITCH_ENABLED) return null;
 
-  // v0.12以降で実装予定
-  // return {
-  //   estimatedBpm,
-  //   keyLabel,
-  //   keyInfo,
-  //   notes
-  // };
+  const {
+    outputToNotesPoly,
+    addPitchBendsToNoteEvents,
+    noteFramesToTime
+  } = await loadBasicPitchModule();
 
-  return null;
+  const basicPitch = await getBasicPitchInstance();
+  const frames = [];
+  const onsets = [];
+  const contours = [];
+
+  await basicPitch.evaluateModel(
+    audioBuffer,
+    (frameBatch, onsetBatch, contourBatch) => {
+      frames.push(...frameBatch);
+      onsets.push(...onsetBatch);
+      contours.push(...contourBatch);
+    },
+    (progress) => {
+      onProgress(progress);
+    }
+  );
+
+  const rawNotes = noteFramesToTime(
+    addPitchBendsToNoteEvents(
+      contours,
+      outputToNotesPoly(
+        frames,
+        onsets,
+        BASIC_PITCH_ONSET_THRESHOLD,
+        BASIC_PITCH_FRAME_THRESHOLD,
+        BASIC_PITCH_MIN_NOTE_LENGTH
+      )
+    )
+  );
+
+  const notes = rawNotes
+    .map(normalizeBasicPitchNote)
+    .filter(Boolean)
+    .sort((a, b) => a.start - b.start);
+
+  const estimatedBpm = estimateBpmFromNotes(notes);
+  const keyInfo = estimateKey(notes);
+  const keyLabel = keyInfo ? `${NOTE_NAMES[keyInfo.tonic]} ${keyInfo.mode}` : "--";
+
+  return {
+    estimatedBpm,
+    keyLabel,
+    keyInfo,
+    notes,
+    rawNotes
+  };
+}
+
+function normalizeBasicPitchNote(note) {
+  const midi = Math.round(
+    Number(
+      note.pitchMidi ??
+      note.midi ??
+      note.pitch ??
+      note.noteNumber
+    )
+  );
+
+  if (!Number.isFinite(midi)) return null;
+
+  const start = Number(
+    note.startTimeSeconds ??
+    note.startTime ??
+    note.start ??
+    0
+  );
+
+  const duration = Math.max(
+    0.03,
+    Number(
+      note.durationSeconds ??
+      note.duration ??
+      (
+        Number.isFinite(Number(note.endTimeSeconds))
+          ? Number(note.endTimeSeconds) - start
+          : 0.12
+      )
+    )
+  );
+
+  const confidence = Number(
+    note.amplitude ??
+    note.confidence ??
+    note.velocity ??
+    0.75
+  );
+
+  return {
+    midi,
+    pc: ((midi % 12) + 12) % 12,
+    name: midiToNoteName(midi),
+    start,
+    end: start + duration,
+    duration,
+    confidence: Number.isFinite(confidence) ? confidence : 0.75,
+    source: "basic-pitch"
+  };
 }
 
 const NOTE_NAMES = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
@@ -68,7 +180,9 @@ const state = {
     [3, 3, 3, 3]
   ],
   detectedNotes: [],
+  basicPitchNotes: [],
   audioDuration: 0,
+  decodedAudioBuffer: null,
   audioBlob: null,
   audioUrl: null,
   mediaRecorder: null,
@@ -136,7 +250,13 @@ const els = {
   downloadFullMidi: document.getElementById("downloadFullMidi"),
   downloadJson: document.getElementById("downloadJson"),
   outputText: document.getElementById("outputText"),
-  solfegeOutputText: document.getElementById("solfegeOutputText")
+  solfegeOutputText: document.getElementById("solfegeOutputText"),
+  runBasicPitchTest: document.getElementById("runBasicPitchTest"),
+  basicPitchProgress: document.getElementById("basicPitchProgress"),
+  basicPitchProgressLabel: document.getElementById("basicPitchProgressLabel"),
+  basicPitchStatus: document.getElementById("basicPitchStatus"),
+  basicPitchNoteCount: document.getElementById("basicPitchNoteCount"),
+  basicPitchPreview: document.getElementById("basicPitchPreview")
 };
 
 function clampBpm(value) {
@@ -235,6 +355,7 @@ function setupBlockDisplayControls() {
   setupCollapsibleBlock("uploadBlock");
   setupCollapsibleBlock("analysisBlock");
   setupCollapsibleBlock("chordBlock");
+  setupCollapsibleBlock("basicPitchTestBlock");
   setupCollapsibleBlock("outputBlock");
 }
 
@@ -917,6 +1038,8 @@ async function handleAudioBlob(blob, label) {
     const arrayBuffer = await blob.arrayBuffer();
     const ctx = await getAudioContext();
     const decoded = await ctx.decodeAudioData(arrayBuffer.slice(0));
+    state.decodedAudioBuffer = decoded;
+    resetBasicPitchTestUi();
 
     els.audioStatus.textContent = "音程・BPM・キーを解析中です。音声が長い場合は少し時間がかかります。";
     await waitFrame();
@@ -947,6 +1070,116 @@ async function handleAudioBlob(blob, label) {
     console.error(error);
     els.audioStatus.textContent = "音声解析に失敗しました。別形式の音声で試してください。";
   }
+}
+
+function resetBasicPitchTestUi() {
+  state.basicPitchNotes = [];
+
+  if (els.basicPitchProgress) els.basicPitchProgress.value = 0;
+  if (els.basicPitchProgressLabel) els.basicPitchProgressLabel.textContent = "0%";
+  if (els.basicPitchNoteCount) els.basicPitchNoteCount.textContent = "--";
+  if (els.basicPitchPreview) els.basicPitchPreview.textContent = "まだ結果はありません。";
+
+  if (els.basicPitchStatus) {
+    els.basicPitchStatus.textContent = state.decodedAudioBuffer
+      ? "音声を読み込みました。Basic Pitch解析テストを実行できます。"
+      : "先に音声ファイル選択または録音を行ってください。";
+  }
+}
+
+function updateBasicPitchProgress(progress) {
+  const pct = normalizeProgressPercent(progress);
+
+  if (els.basicPitchProgress) els.basicPitchProgress.value = pct;
+  if (els.basicPitchProgressLabel) els.basicPitchProgressLabel.textContent = `${pct}%`;
+}
+
+function normalizeProgressPercent(progress) {
+  const raw = Number(progress);
+  if (!Number.isFinite(raw)) return 0;
+
+  if (raw <= 1) {
+    return Math.max(0, Math.min(100, Math.round(raw * 100)));
+  }
+
+  return Math.max(0, Math.min(100, Math.round(raw)));
+}
+
+async function runBasicPitchTest() {
+  if (!state.decodedAudioBuffer) {
+    if (els.basicPitchStatus) {
+      els.basicPitchStatus.textContent = "先に音声ファイル選択または録音を行ってください。";
+    }
+    return;
+  }
+
+  if (!els.runBasicPitchTest) return;
+
+  els.runBasicPitchTest.disabled = true;
+  updateBasicPitchProgress(0);
+
+  if (els.basicPitchStatus) {
+    els.basicPitchStatus.textContent = "Basic Pitchを読み込み中です。初回は少し時間がかかります。";
+  }
+
+  try {
+    const result = await analyzeWithBasicPitchIfAvailable(
+      state.decodedAudioBuffer,
+      (progress) => {
+        updateBasicPitchProgress(progress);
+        if (els.basicPitchStatus) {
+          els.basicPitchStatus.textContent = `Basic Pitch解析中です... ${normalizeProgressPercent(progress)}%`;
+        }
+      }
+    );
+
+    updateBasicPitchProgress(100);
+
+    state.basicPitchNotes = result?.notes || [];
+
+    if (els.basicPitchNoteCount) {
+      els.basicPitchNoteCount.textContent = String(state.basicPitchNotes.length);
+    }
+
+    if (els.basicPitchStatus) {
+      els.basicPitchStatus.textContent = state.basicPitchNotes.length
+        ? `Basic Pitch解析テスト完了：${state.basicPitchNotes.length}音を検出しました。次版でコード生成へ接続します。`
+        : "Basic Pitch解析は完了しましたが、音符候補は検出されませんでした。別の音声で試してください。";
+    }
+
+    if (els.basicPitchPreview) {
+      els.basicPitchPreview.textContent = formatBasicPitchPreview(state.basicPitchNotes);
+    }
+  } catch (error) {
+    console.error(error);
+
+    if (els.basicPitchStatus) {
+      els.basicPitchStatus.textContent = "Basic Pitch解析テストに失敗しました。モデルファイルの配置、Vercelの再デプロイ、ブラウザ互換性を確認してください。";
+    }
+
+    if (els.basicPitchPreview) {
+      els.basicPitchPreview.textContent = String(error?.message || error || "Unknown error");
+    }
+  } finally {
+    els.runBasicPitchTest.disabled = false;
+  }
+}
+
+function formatBasicPitchPreview(notes) {
+  if (!notes.length) return "検出音はありません。";
+
+  const rows = notes.slice(0, 24).map((note, index) => {
+    const start = note.start.toFixed(2).padStart(5, " ");
+    const duration = note.duration.toFixed(2).padStart(4, " ");
+    const confidence = note.confidence.toFixed(2);
+    return `${String(index + 1).padStart(2, "0")}. ${note.name.padEnd(4, " ")} start:${start}s  dur:${duration}s  conf:${confidence}`;
+  });
+
+  if (notes.length > 24) {
+    rows.push(`...他 ${notes.length - 24} 音`);
+  }
+
+  return rows.join("\n");
 }
 
 function waitFrame() {
@@ -2018,6 +2251,10 @@ if (els.chordOptionModeInput) {
   });
 }
 
+
+if (els.runBasicPitchTest) {
+  els.runBasicPitchTest.addEventListener("click", runBasicPitchTest);
+}
 
 els.tapTempo.addEventListener("click", () => {
   const now = performance.now();

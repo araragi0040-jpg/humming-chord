@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ハミングコード MVP v0.11 Vite</title>
+  <title>ハミングコード MVP v0.12 Basic Pitch Test</title>
 </head>
 <body>
   <main class="app">
@@ -11,7 +11,7 @@
       <p class="eyebrow">Humming → Key / Chord Draft</p>
       <h1>ハミングコード</h1>
       <p class="lead">
-        鼻歌から推定BPM・メロディ・キー・参考コードを作り、Basic Pitch連携に進めるVite構成MVPです。
+        鼻歌から推定BPM・メロディ・キー・参考コードを作り、Basic Pitchの読み込みテストもできるMVPです。
       </p>
     </header>
 
@@ -19,6 +19,7 @@
       <a href="#uploadBlock">録音</a>
       <a href="#analysisBlock">解析</a>
       <a href="#chordBlock">コード</a>
+      <a href="#basicPitchTestBlock">BP</a>
       <a href="#outputBlock">出力</a>
     </nav>
 
@@ -143,6 +144,39 @@
       </div>
     </section>
 
+
+    <section class="card app-block" id="basicPitchTestBlock">
+      <h2>Basic Pitch連携テスト</h2>
+      <p class="note">
+        既存のコード抽出にはまだ反映せず、Basic Pitchを読み込んで音声からMIDI音符候補を取得できるかだけ確認します。
+      </p>
+
+      <div class="basic-pitch-panel">
+        <button id="runBasicPitchTest" type="button" class="secondary">
+          Basic Pitchで解析テスト
+        </button>
+        <div class="basic-pitch-progress-wrap">
+          <progress id="basicPitchProgress" value="0" max="100"></progress>
+          <span id="basicPitchProgressLabel">0%</span>
+        </div>
+      </div>
+
+      <p id="basicPitchStatus" class="status">
+        先に音声ファイル選択または録音を行ってください。
+      </p>
+
+      <div class="basic-pitch-result">
+        <span>Basic Pitch検出音数</span>
+        <strong id="basicPitchNoteCount">--</strong>
+        <small>この段階では確認用です。次版でコード生成へ接続します。</small>
+      </div>
+
+      <details class="details">
+        <summary>Basic Pitch検出メモ</summary>
+        <pre id="basicPitchPreview" class="basic-pitch-preview">まだ結果はありません。</pre>
+      </details>
+    </section>
+
     <section class="card app-block" id="outputBlock">
       <h2>4. 確認・出力</h2>
       <div class="actions">
@@ -169,7 +203,7 @@
 
     <footer>
       <p>
-        v0.11 / Vite構成へ移行・Basic Pitch接続準備枠を追加。推定結果は必ず耳で確認してください。
+        v0.12 / Basic Pitch読み込みテストを追加。既存コード抽出への反映は次版以降。推定結果は必ず耳で確認してください。
       </p>
     </footer>
   </main>

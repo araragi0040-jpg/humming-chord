@@ -1,14 +1,18 @@
 {
   "name": "humming-chord-mvp",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "copy-basic-pitch-model": "node scripts/copy-basic-pitch-model.mjs",
+    "build": "node scripts/copy-basic-pitch-model.mjs && vite build",
+    "preview": "vite preview",
+    "postinstall": "node scripts/copy-basic-pitch-model.mjs"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@spotify/basic-pitch": "^1.0.1"
+  },
   "devDependencies": {
     "vite": "^6.0.0"
   }
